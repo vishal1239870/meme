@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Meme Generator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background: #555;
+    }
+
+    img {
+      max-width: 100%;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Meme Generator 😂</h1>
+
+  <div class="container">
+    <select id="templateList">
+      <option disabled selected>Loading templates...</option>
+    </select>
+
+    <input type="text" id="topText" placeholder="Top Text">
+    <input type="text" id="bottomText" placeholder="Bottom Text">
+
+    <button onclick="generateMeme()">Generate Meme</button>
+    <a id="downloadLink" style="display:none;" download="meme.png"><button>Download Meme</button></a>
+
+    <img id="memeImage" src="" alt="" style="display:none;">
+  </div>
+
+  <script>
+    const templateList = document.getElementById('templateList');
+    const memeImage = document.getElementById('memeImage');
+    const downloadLink = document.getElementById('downloadLink');
+
+    // Load meme templates from Memegen API
+    async function loadTemplates() {
+      const res = await fetch('https://api.memegen.link/templates');
+      const templates = await res.json();
+
+      templateList.innerHTML = '<option disabled selected>Select a Template</option>';
+      templates.forEach(template => {
+        const option = document.createElement('option');
+        option.value = template.id;
+        option.textContent = template.name;
+        templateList.appendChild(option);
+      });
+    }
+
+    loadTemplates();
+
+    function sanitize(text) {
+      return text
+        .replace(/ /g, "_")
+        .replace(/\?/g, "~q")
+        .replace(/%/g, "~p")
+        .replace(/#/g, "~h")
+        .replace(/\//g, "~s")
+        .replace(/"/g, "''");
+    }
+
+    function generateMeme() {
+      const template = templateList.value;
+      const top = sanitize(document.getElementById('topText').value) || "_";
+      const bottom = sanitize(document.getElementById('bottomText').value) || "_";
+
+      const url = `https://api.memegen.link/images/${template}/${top}/${bottom}.png`;
+
+      memeImage.src = url;
+      memeImage.style.display = 'block';
+
+      downloadLink.href = url;
+      downloadLink.style.display = 'inline-block';
+    }
+  </script>
+
+</body>
+</html>
